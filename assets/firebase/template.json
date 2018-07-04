@@ -1,0 +1,41 @@
+{
+  "defaultLocation" : "-L6-k2TKsF3Wz2SM_Ph1",
+  "locations" : {
+    "-L6-k2TKsF3Wz2SM_Ph1" : {
+      "categories" : {
+        "-L603C9fBeN_a3gXXOSs" : {
+          "info" : "<p>Category A description</p>",
+          "name" : "Category A",
+          "order" : "1"
+        }
+      },
+      "defaultMap" : {
+        "name" : "-L65uO17S2QWihbY4D-x"
+      },
+      "info" : "<p>New City Info</p>",
+      "mapPosition" : {
+        "bearing" : 0,
+        "latitude" : 0,
+        "longitude" : 0,
+        "pitch" : 0,
+        "zoom" : 2
+      },
+      "name" : "New City",
+      "order" : "1"
+    }
+  },
+  "maps" : {
+    "-L65uO17S2QWihbY4D-x" : {
+      "category" : "-L603C9fBeN_a3gXXOSs",
+      "location" : "-L6-k2TKsF3Wz2SM_Ph1",
+      "name" : "Map One",
+      "order" : "1"
+    }
+  },
+  "project" : {
+    "info" : "<p>Project description goes here...</p>",
+    "subtitle" : "Project subtitle",
+    "title" : "Project Name",
+    "footer" : false
+  }
+}

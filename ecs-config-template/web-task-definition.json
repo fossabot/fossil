@@ -1,0 +1,21 @@
+{
+  "containerDefinitions": [
+  {
+    "name": "PLACEHOLDER_PROJECT_NAME-frontend",
+    "image": "PLACEHOLDER_REGISTRY/PLACEHOLDER_PROJECT_NAME/PLACEHOLDER_PROJECT_NAME-frontend-repo:latest",
+    "essential": true,
+    "cpu": 1024,
+    "memory": 300,
+    "portMappings": [
+    {
+      "containerPort": 3000,
+      "hostPort": 80
+    }],
+    "environment": [
+    {
+      "name": "NODE_ENV",
+      "value": "production"
+    }]
+  }],
+  "family": "PLACEHOLDER_PROJECT_NAME-family"
+}
