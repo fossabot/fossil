@@ -1,5 +1,5 @@
 # Fossil
-*Application for managing and visualizing maps.*
+*Application for managing and visualizing maps.Built with Nuxt and Mapbox-gl-js.*
 
 Read the [wiki](https://github.com/UrbanSystemsLab/fossil/wiki) for detailed setup.
 
