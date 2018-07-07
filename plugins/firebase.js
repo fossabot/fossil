@@ -1,10 +1,5 @@
 import Vuex from 'vuex'
 import firebase from 'firebase'
-import 'firebase/storage' // Workaround for Nuxt usage
-
-// New Firebase Project Template 
-import firebaseTemplate from '~/assets/firebase/template'
-import styleTemplate from '~/assets/map-style/starter-style'
 
 // Reference: https://github.com/davidroyer/nuxt-firebase-auth/blob/master/plugins/fireauth.js
 export default (context) => {
@@ -13,22 +8,8 @@ export default (context) => {
   if (!firebase.apps.length) {
     firebase.initializeApp(process.env.firebaseConfig)
   }
-  
+
   var db = firebase.database()
-  var storage = firebase.storage()
-  var storageRef = storage.ref()
-  var imageStoreRef = storageRef.child('maps/content')
-  var styleStoreRef = storageRef.child('style/style.json')
-
-
-  // If this is a brand new project, setup a new project
-  db.ref('project').once('value')
-    .then((snap) => {
-      if (snap.val() === null) {
-        this.$bus.$emit('openModal', 'setup')
-      }
-    })
-
   firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
       // User is signed in.

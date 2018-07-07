@@ -17,8 +17,7 @@ https://nuxtjs.org/guide/plugins
 ```
 
 - `element-ui.js`: Front-end [Element UI](http://element.eleme.io/) library
-- `firebase.js`:
-
+- `firebase.js`: For Firebase Realtime Database, Authentication, and Storage integration
 - `event-bus.js`: Shared event bus for all Vue components
 - `local-storage.js`: Creates persisted state using `vuex-persistedstate`
 - `quill-editor.js`: Extended quill [vue2-editor](https://github.com/davidroyer/vue2-editor)

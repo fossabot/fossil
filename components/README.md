@@ -137,12 +137,15 @@ Displays legend for the active map.
 - Email verification link, post account creation
 
 ## Utils
+
 ### Mixins
+
 `GenerateIdMixin.vue`:
 Fancy ID generator that creates 20-character string identifiers
 
 `ModalKeyMixin.vue`: Common computed properties and methods required by modals.
-**Computed**
+
+#### Computed
 - `location()` : Active location value
 - `locationKey()` : Active location key
 - `category()` : Category value
@@ -154,14 +157,15 @@ Fancy ID generator that creates 20-character string identifiers
 - `legend()` : Legend data
 - `maps()` : Active location maps
 
-**Methods**
+#### Methods
 `createMapKey()`: Create a unique key for a new map to be added
 
 `ProjectKeyMixin.vue`: Project info details
-**Computed**
+
+#### Computed
 `project()`: Returns project info
 
-**Methods**
+#### Methods
 `saveProjectInfo()`: Saves project info
 
 `queryParamsMixin.vue`: Updates URL query parameters with the provided key-value.

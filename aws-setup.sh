@@ -79,7 +79,7 @@ function setup_s3(){
   ## Replace the placeholder cluster name & bucket name with project specific names.
   sed -e "s/PLACEHOLDER_CLUSTER_NAME/${CLUSTER_NAME}/g"  "ecs-config-template/ecs.config" > "ecs-config/ecs.config"
   sed -e "s/PLACEHOLDER_BUCKET_NAME/${S3_BUCKET}/g" "ecs-config-template/copy-ecs-config-to-s3" > "ecs-config/copy-ecs-config-to-s3"
-  
+
   # Your bucket name
   aws s3api create-bucket --bucket $S3_BUCKET
   aws s3 cp ecs-config/ecs.config s3://"$S3_BUCKET"/ecs.config
@@ -95,13 +95,13 @@ function setup_ec2(){
   SECURITY_GROUP=$( \
     aws ec2 describe-security-groups --filters "Name=group-name,Values=${SECURITY_GROUP_NAME}" \
     | python -c "import sys, json; print(json.load(sys.stdin)['SecurityGroups'][0]['GroupId'])")
-  
+
   # Create EC2 Instances
   # Provide your own instance role & key pair names
   aws ec2 run-instances --image-id ami-2b3b6041 --count $EC2_INSTANCE_COUNT --instance-type t2.micro \
    --iam-instance-profile Name=$ECS_INSTANCE_ROLE --security-group-ids $SECURITY_GROUP \
    --key-name $KEY_PAIR_NAME --user-data file://ecs-config/copy-ecs-config-to-s3
-  ## The ami2b3b6041 is the official Amazon ECS AMI for useast1  
+  ## The ami2b3b6041 is the official Amazon ECS AMI for useast1
 }
 
 # ===========================
@@ -111,7 +111,7 @@ function setup_elb(){
   SECURITY_GROUP=$( \
     aws ec2 describe-security-groups --filters "Name=group-name,Values=${SECURITY_GROUP_NAME}" \
     | python -c "import sys, json; print(json.load(sys.stdin)['SecurityGroups'][0]['GroupId'])")
-  
+
   INSTANCE_IDS=$(aws ec2 describe-instances --filters "Name=instance.group-id,Values=$SECURITY_GROUP" --output text --query Reservations[].Instances[].InstanceId)
   SUBNET_IDS=$(aws ec2 describe-subnets --output text --query Subnets[].SubnetId)
 
@@ -136,21 +136,22 @@ function setup_elb(){
 function setup_ecs(){
   ## Santiy Check: Give it a minute. List the instances that joined the cluster
   aws ecs list-container-instances --cluster $CLUSTER_NAME
-  
-  ## Replace the placeholder project name in task definition 
-  sed -e "s/PLACEHOLDER_PROJECT_NAME/${PROJECT_NAME}/g" "ecs-config-template/web-task-definition.json" > "ecs-config/web-task-definition.json"
-  sed -i "s/PLACEHOLDER_REGISTRY/${REGISTRY}/g" "ecs-config/web-task-definition.json"
+
+  ## Replace the placeholder project and registry name in task definition file.
+  sed -e "s/PLACEHOLDER_PROJECT_NAME/${PROJECT_NAME}/g" "ecs-config-template/web-task-definition.json" > "ecs-config/web-task-definition-temp.json"
+  sed -e "s/PLACEHOLDER_REGISTRY/${REGISTRY}/g" "ecs-config/web-task-definition-temp.json" > "ecs-config/web-task-definition.json"
+  rm ecs-config/web-task-definition-temp.json
   ## Sanity check: Print the task definition
-  python -m json.tool ecs-config/web-task-definition.json
+  python -m json.tool "ecs-config/web-task-definition.json"
 
   # Register the task definition
   TASK_REGISTER=$(\
   aws ecs register-task-definition \
   --cli-input-json file://ecs-config/web-task-definition.json)
-  
+
   ## Grab revision # using regular bash and grep
   TASK_REVISION=$(echo "$TASK_REGISTER" | grep -o '"revision": [0-9]*' | grep -Eo '[0-9]+')
-                
+
   # Create a service
   aws ecs create-service --cluster $CLUSTER_NAME --service-name $SERVICE_NAME --task-definition "$TASK_DEFINITION_NAME":"$TASK_REVISION"  --desired-count 1
 
@@ -159,7 +160,7 @@ function setup_ecs(){
   # Deploy revision
   # aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --task-definition "$TASK_DEFINITION_NAME":"$TASK_REVISION" --desired-count 1
 
-  # # (Optional) Set desired count to 2 for zero downtime during rolling update. Set it to 3 for higher loads. 
+  # (Optional) Set desired count to 2 for zero downtime during rolling update. Set it to 3 for higher loads.
   # aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME \
   # --task-definition "$TASK_DEFINITION_NAME":"$TASK_REVISION" --desired-count 2
 
@@ -173,7 +174,7 @@ function delete_security_group(){
   SECURITY_GROUP=$( \
     aws ec2 describe-security-groups --filters "Name=group-name,Values=${SECURITY_GROUP_NAME}" \
     | python -c "import sys, json; print(json.load(sys.stdin)['SecurityGroups'][0]['GroupId'])")
-  
+
   # Remove the security group
   aws ec2 delete-security-group --group-id SECURITY_GROUP
 }
@@ -199,7 +200,7 @@ function delete_ec2(){
   SECURITY_GROUP=$( \
     aws ec2 describe-security-groups --filters "Name=group-name,Values=${SECURITY_GROUP_NAME}" \
     | python -c "import sys, json; print(json.load(sys.stdin)['SecurityGroups'][0]['GroupId'])")
-  
+
   ## Get the instance Ids
   INSTANCE_IDS=$(aws ec2 describe-instances --filters "Name=instance.group-id,Values=$SECURITY_GROUP" --output text --query Reservations[].Instances[].InstanceId)
   ## Terminate the EC2 Instances
@@ -216,7 +217,7 @@ function delete_elb(){
 function delete_ecs(){
   # Delete the cluster
   aws ecs delete-cluster --cluster $CLUSTER_NAME
-  
+
   # Deregister the task definition
   ## Get the Task revision
   TASK_REVISION=$(echo "$TASK_REGISTER" | grep -o '"revision": [0-9]*' | grep -Eo '[0-9]+')
@@ -241,16 +242,16 @@ Usage: ${0} -h
 OPTIONS:
 
    -h|--help                    Show this message
-   
+
    -1|--setup-security-group    Setup new secrurity group
-   -2|--setup-ecr               Setup Docker repository in ECR 
+   -2|--setup-ecr               Setup Docker repository in ECR
    -3|--setup-s3                Setup S3 bucket with ECS config file
    -4|--setup-ec2               Setup EC2 as containers
    -5|--setup-elb               Setup classic load balancer
    -6|--setup-ecs               Setup ECS task and deploy a new service
-   
+
    --delete-security-group      Teardown the security group
-   --delete-ecr                 Teardown Docker repository in ECR 
+   --delete-ecr                 Teardown Docker repository in ECR
    --delete-s3                  Teardown S3 bucket with ECS config file
    --delete-ec2                 Teardown EC2 as containers
    --delete-elb                 Teardown classic load balancer

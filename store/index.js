@@ -3,7 +3,7 @@ import Vuex from 'vuex'
 import firebase from 'firebase'
 import 'firebase/storage' // Workaround for Nuxt usage
 
-// New Firebase Project Template 
+// New Firebase Project Template
 import firebaseTemplate from '~/assets/firebase/template'
 import styleTemplate from '~/assets/map-style/starter-style'
 
@@ -21,7 +21,7 @@ var styleStoreRef = storageRef.child('style/style.json')
 
 const state = {
   // True if active signed in user is admin or editor
-  editMode: false, 
+  editMode: false,
   // List of all users
   allUsers: [],
   // Active user info
@@ -86,6 +86,22 @@ const getters = {
 
 
 const actions = {
+  // Check if project exists
+  checkProject: function(store) {
+    return new Promise((resolve, reject) => {
+      // Check for project key in Firebase Realtime DB
+      db.ref('project').once('value')
+        .then((snap) => {
+          if (snap.val() === null) {
+            // No project found
+            resolve(false)
+          }
+        })
+        .catch((error) => {
+          reject(error)
+        })
+    })
+  },
   setMapLoadedState: function(store, flag) {
     store.commit('storeMapLoadedState', flag)
   },
@@ -94,14 +110,14 @@ const actions = {
       store.commit('storeMobileDevice', payload)
     }
   },
-  createShortLink: function (store, payload) {
+  createShortLink: function(store, payload) {
     return new Promise((resolve, reject) => {
       var url = payload
       if (url !== "") {
         var id = Math.random().toString(36).substr(2, 6)
         db.ref('shortLinks/' + id).set(url)
           .then((snap) => {
-            resolve(location.protocol + '//' + location.host + location.pathname +'share/'+ id)
+            resolve(location.protocol + '//' + location.host + location.pathname + 'share/' + id)
           })
           .catch((error) => {
             reject(error)
@@ -109,9 +125,9 @@ const actions = {
       }
     })
   },
-  getLongLink: function (store, payload) {
+  getLongLink: function(store, payload) {
     return new Promise((resolve, reject) => {
-      db.ref('shortLinks/'+payload).once('value')
+      db.ref('shortLinks/' + payload).once('value')
         .then((snap) => {
           resolve(snap)
         })
@@ -131,8 +147,9 @@ const actions = {
           // Set basic template
           db.ref('/').set(firebaseTemplate)
             .then(() => {
-              // Also set default map style to Basic Style 
-              return db.ref('/style/').set(styleTemplate)
+              // Also set default map style to Basic Style
+              // return db.ref('/style/').set(styleTemplate)
+              return true
             })
             .then(() => {
               location.reload()
